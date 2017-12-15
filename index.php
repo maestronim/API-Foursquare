@@ -9,60 +9,83 @@
 <html>
 	<head>
     	<title>Pizzerie Bergamo</title>
-        <link rel="stylesheet" type="text/css" href="http://maestronim.altervista.org/Pizzerie/style12.css">
+        <link rel="stylesheet" type="text/css" href="http://maestronim.altervista.org/Pizzerie/style19.css">
         <meta charset="utf-8">
   		<meta name="viewport" content="width=device-width, initial-scale=1">
   		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     </head>
-    <body>
+    <body onload="loadResults(true)">
     	<div class="container">
         	<div class="mapcontainer">
            		<div id="map"></div>
             </div>
-        	<?php
-                $venues = $resp_array["response"]["venues"];
-                for($i=0;$i<count($venues);$i++)
-                {
-                  	echo "<div id=\"" . $venues[$i]["id"] . "\" class=\"venuecontainer\" onclick=\"divClick(this.id)\">";
-                    	echo "<div class=\"index\">" . ($i+1) . "</div>";
-                    	echo "<div class=\"venuemeta\">";
-                    		echo "<div class=\"venuenameaddress\">";
-                  				echo "<div class=\"venuename\">" . $venues[$i]["name"] . "</div>";
-                  				echo "<div class=\"venueaddress\">" . $venues[$i]["location"]["address"] . "</div>";
-                    		echo "</div>";
-                            echo "<div class=\"venuecheckins\">Visite registrate: " . $venues[$i]["stats"]["checkinsCount"] . "</div>";
-                            echo "<hr class=\"myhr\">";
-                  		echo "</div>";
-                    echo "</div>";
-                    $coords[] = array(
-                    				"lat" => $venues[$i]["location"]["lat"],
-                                    "lng" => $venues[$i]["location"]["lng"]
-                    );
-                    $IDs[] = $venues[$i]["id"];
-          			$names[] = $venues[$i]["name"];
-                    $venues_info [] = array(
-                    					"id" => $venues[$i]["id"],
-                                    	"name" => $venues[$i]["name"],
-                                    	"coords" => array(
-                                        					"lat" => $venues[$i]["location"]["lat"],
-                                                            "lng" => $venues[$i]["location"]["lng"]
-                                         )
-                   	);
-                                    				
-                }
-            ?>
+            <div class="venuesbuttoncontainer">
+                <div class="venuescontainer">
+                <?php
+                    $venues = $resp_array["response"]["venues"];
+                    for($i=0;$i<count($venues);$i++)
+                    {
+                        $venues_info [] = array(
+                                            "id" => $venues[$i]["id"],
+                                            "name" => $venues[$i]["name"],
+                                            "coords" => array(
+                                                                "lat" => $venues[$i]["location"]["lat"],
+                                                                "lng" => $venues[$i]["location"]["lng"]
+                                             ),
+                                             "address" => $venues[$i]["location"]["address"],
+                                             "checkins" => $venues[$i]["stats"]["checkinsCount"]
+                        );
+
+                    }
+                ?>
+                </div>
+        	</div>
 		</div>
         <script>
         	<?php
             	echo "var venues_info = " . json_encode($venues_info) . ";";
             ?>
             
+            var currentVenue = 0;
             var markers = [];
             var MAP;
             var precInfoWindow = null;
             var precMarker = null;
+            
+            function loadResults(init) {
+            	for (i = 0; i < 10; i++) {
+                	document.getElementsByClassName("venuescontainer")[0].innerHTML +=
+                	"<div id=\"" + venues_info[currentVenue]["id"] + "\" class=\"venuecontainer\" onclick=\"openInfoWindow(this.id)\">" +
+                    "<div class=\"index\">" + (currentVenue+1) + "</div>" +
+                    "<div class=\"venuemeta\">" +
+                    "<div class=\"venuenameaddress\">" +
+                    "<div class=\"venuename\">" + venues_info[currentVenue]["name"] + "</div>" +
+                    "<div class=\"venueaddress\">" + venues_info[currentVenue]["address"] + "</div>" +
+                    "</div>" +
+                    "<div class=\"venuecheckins\">Visite registrate: " + venues_info[currentVenue]["checkins"] + "</div>" +
+                    "<hr class=\"myhr\">" +
+                    "</div>" +
+                    "</div>";
+
+                    placeMarker(new google.maps.LatLng(parseFloat(venues_info[currentVenue]["coords"]["lat"]), parseFloat(venues_info[currentVenue]["coords"]["lng"])));
+                    currentVenue++;
+                }
+                
+                /*if(init == true) {
+                	document.getElementsByClassName("container")[0].innerHTML += 
+                    "<div class=\"button\">" + 
+            		"<input type=\"button\" onclick=\"loadResults(false)\" value=\"Carica altri risultati\" class=\"btn btn-primary btn-md\" style=\"margin-left:10%;\">" +
+            		"</div>";
+                }*/
+                
+                if(currentVenue >= 50) {
+               		var child = document.getElementsByClassName("button")[0];
+          			var parent = document.getElementsByClassName("container")[0];
+          			parent.removeChild(child);
+                }
+            }
             
 			function myMap() {
 				var mapProp = {
@@ -70,7 +93,7 @@
                 	zoom: 10
             	};
             	MAP = new google.maps.Map(document.getElementById("map"), mapProp);
-                for (i = 0; i < venues_info.length; i++) {
+                for (i = currentVenue; i < 10; i++) {
                 	placeMarker(new google.maps.LatLng(parseFloat(venues_info[i]["coords"]["lat"]), parseFloat(venues_info[i]["coords"]["lng"])));
                 }
             }
@@ -104,14 +127,14 @@
     						window.scrollTo(0, top);
                             precInfoWindow = infowindow;
                             precMarker = marker;
-                            break;
+                        	break;
                        	}
                     }
     			});
                 markers.push(marker);
             }
             
-            function divClick(id) {
+            function openInfoWindow(id) {
             	if(precInfoWindow != null) {
                 	precInfoWindow.close();
                 }
@@ -137,6 +160,6 @@
             }
         </script>
 
-		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBGSsq_8J9V1KCMFdGjuszWGe1hEvWkd6Q&callback=myMap"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCegvSr3HlEm1VmCEZL1SBrDsqAbVOaIwY&callback=myMap"></script>
     </body>
 </html>
