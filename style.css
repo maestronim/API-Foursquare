@@ -8,12 +8,15 @@ div.container {
     margin: 0 auto;
 }
 
+div.venuescontainer {
+	position: relative;
+    width: 100%;
+}
+
 div.venuecontainer {
     position: relative;
-    width: 40%;
+    width: 100%;
    	padding-top: 5px;
-    text-align: left;
-    overflow: hidden;
 }
 
 div.venuecontainer:hover {
@@ -63,6 +66,12 @@ div.mapcontainer {
     z-index: 2;
 }
 
+div.venuesbuttoncontainer {
+	position: relative;
+    width: 40%;
+    text-align: left;
+}
+
 div.index {
 	width: 10%;
     text-align: center;
@@ -74,6 +83,13 @@ hr.myhr {
 	height: 1px;
     background-color: black;
     margin-right: 10px;
+}
+
+div.button {
+	position: relative;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    width: 40%;
 }
 
 #map {
